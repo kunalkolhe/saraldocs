@@ -6,6 +6,10 @@ SaralDocs is a web application that converts complex government, legal, and offi
 
 ## Recent Changes (December 2025)
 
+- **Project Structure Fixed**: Moved all files from nested `LanguageFulfillerzip/` folder to root level
+- **Vercel Deployment Configuration**: Added `vercel.json` with proper serverless function setup and static file handling
+- **API Serverless Handler**: Created `api/index.ts` for Vercel serverless deployment
+- **Environment Variables**: Configured SUPABASE_URL, SUPABASE_ANON_KEY, and GOOGLE_API_KEY
 - **Supabase Authentication**: Integrated Supabase for email/password authentication (signup and login)
 - **File History Feature**: Logged-in users can view their processed documents for 7 days with auto-delete
 - **History Management**: Users can view, clear, or delete individual history records
@@ -14,6 +18,20 @@ SaralDocs is a web application that converts complex government, legal, and offi
 - **Step-by-Step Guidance**: Upload page now shows numbered instructions (4 steps) to guide users through the process
 - **Trust Indicators**: Added "Free to Use", "12 Languages", and "100% Secure" badges on landing page
 - **Improved Navigation**: Simplified header with clear icons and mobile-responsive hamburger menu
+
+## Vercel Deployment
+
+The project is configured for Vercel deployment with:
+
+1. **Static Frontend**: Built by Vite, served from `dist/public`
+2. **Serverless API**: Express-based API handler in `api/index.ts`
+3. **Configuration**: `vercel.json` handles routing between static files and API
+
+**Important**: When deploying to Vercel, ensure these environment variables are set:
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `GOOGLE_API_KEY`
+- `SESSION_SECRET`
 
 ## Supabase Database Setup
 
