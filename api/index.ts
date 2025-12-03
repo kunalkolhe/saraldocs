@@ -34,6 +34,35 @@ function getGeminiClient(): GoogleGenAI {
   return new GoogleGenAI({ apiKey });
 }
 
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  options: { maxRetries?: number; baseDelayMs?: number; maxDelayMs?: number } = {}
+): Promise<T> {
+  const { maxRetries = 4, baseDelayMs = 1000, maxDelayMs = 10000 } = options;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      const isRetryable = 
+        error?.status === 503 ||
+        error?.code === 503 ||
+        error?.message?.includes("overloaded") ||
+        error?.message?.includes("UNAVAILABLE") ||
+        error?.message?.includes("503");
+      
+      if (!isRetryable || attempt === maxRetries) {
+        throw error;
+      }
+      
+      const delay = Math.min(baseDelayMs * Math.pow(2, attempt) + Math.random() * 500, maxDelayMs);
+      console.log(`Gemini API overloaded, retrying in ${Math.round(delay)}ms (attempt ${attempt + 1}/${maxRetries})`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  throw new Error("Max retries exceeded");
+}
+
 const LANGUAGE_NAMES: Record<string, string> = {
   en: "English",
   hi: "Hindi",
@@ -61,23 +90,25 @@ Do not summarize or skip any content - extract EVERYTHING.
 If text is in multiple languages, extract all of them.
 Output only the extracted text, nothing else.`;
 
-  const response = await client.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: [
-      {
-        role: "user",
-        parts: [
-          {
-            inlineData: {
-              mimeType: mimeType,
-              data: base64Data,
+  const response = await retryWithBackoff(() => 
+    client.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              inlineData: {
+                mimeType: mimeType,
+                data: base64Data,
+              },
             },
-          },
-          { text: prompt },
-        ],
-      },
-    ],
-  });
+            { text: prompt },
+          ],
+        },
+      ],
+    })
+  );
 
   const extractedText = response.text?.trim() || "";
   
@@ -125,14 +156,16 @@ Respond with JSON in this exact format:
 Document to simplify:
 ${text}`;
 
-  const response = await client.models.generateContent({
-    model: "gemini-2.5-flash",
-    config: {
-      systemInstruction: systemPrompt,
-      responseMimeType: "application/json",
-    },
-    contents: prompt,
-  });
+  const response = await retryWithBackoff(() =>
+    client.models.generateContent({
+      model: "gemini-2.5-flash",
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: "application/json",
+      },
+      contents: prompt,
+    })
+  );
 
   const content = response.text;
   if (!content) throw new Error("No response from AI");
@@ -273,8 +306,20 @@ app.post("/api/process", async (req: Request, res: Response) => {
       targetLanguage: targetLanguage || "en",
       processedAt: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Processing error:", error);
+    const isOverloaded = 
+      error?.status === 503 ||
+      error?.code === 503 ||
+      error?.message?.includes("overloaded") ||
+      error?.message?.includes("UNAVAILABLE");
+    
+    if (isOverloaded) {
+      return res.status(503).json({ 
+        message: "The AI service is currently busy. Please wait a moment and try again." 
+      });
+    }
+    
     const message = error instanceof Error ? error.message : "Failed to process document";
     res.status(500).json({ message });
   }
@@ -306,11 +351,13 @@ Respond with JSON:
   "glossary": [...]
 }`;
 
-    const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
-      config: { responseMimeType: "application/json" },
-      contents: prompt,
-    });
+    const response = await retryWithBackoff(() =>
+      client.models.generateContent({
+        model: "gemini-2.5-flash",
+        config: { responseMimeType: "application/json" },
+        contents: prompt,
+      })
+    );
 
     const result = JSON.parse(response.text || "{}");
 
@@ -322,8 +369,19 @@ Respond with JSON:
       targetLanguage,
       processedAt: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Translation error:", error);
+    const isOverloaded = 
+      error?.status === 503 ||
+      error?.code === 503 ||
+      error?.message?.includes("overloaded") ||
+      error?.message?.includes("UNAVAILABLE");
+    
+    if (isOverloaded) {
+      return res.status(503).json({ 
+        message: "The AI service is currently busy. Please wait a moment and try again." 
+      });
+    }
     res.status(500).json({ message: "Failed to translate document" });
   }
 });
