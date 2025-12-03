@@ -1,0 +1,263 @@
+
+*A multi-language government & official document simplifier*
+
+---
+
+## **1. Problem Statement**
+
+Government, legal, and official documents are written in complex language.
+Common people struggle to understand:
+
+* Complicated terminology
+* Legal-style sentences
+* Hidden important points
+* Instructions and conditions
+
+There is **no platform** that converts documents into **easy, human-understandable language** in all major Indian languages.
+
+---
+
+## **2. Goal / Vision**
+
+Create a web application where a user uploads any document (photo, PDF, scan), selects a language, and receives:
+
+1. **Full simplified version**
+2. **Meaning of difficult terms**
+3. **Exact information** (nothing removed or changed)
+4. **Downloadable output** (PDF & JPEG)
+
+The output must be accurate, simple, and in a chosen Indian language.
+
+---
+
+## **3. Target Users**
+
+* Students
+* Citizens applying for government schemes
+* Applicants for ID proofs
+* People handling legal/official forms
+* Senior citizens
+* Anyone struggling with complex paperwork
+
+---
+
+## **4. Key Features (High-Level)**
+
+### **4.1 Document Upload**
+
+* Accepts: **JPEG, PNG, PDF**
+* Single or multiple pages
+* File size limit: 20MB
+* Real-time preview
+
+### **4.2 OCR Extraction**
+
+* Convert image → text using OCR
+* Support Hindi, Marathi, English, Gujarati, Tamil, Telugu, Kannada, Malayalam, Bengali, Punjabi, Odia, Urdu
+* Maintain **100% of original information**
+
+### **4.3 Simplification Engine**
+
+For extracted text:
+
+* Rewrites into **very simple human language**
+* Breaks long sentences
+* Gives **clear meaning of terms**
+* No extra information added
+* No point removed
+
+### **4.4 Glossary Explanation**
+
+* Detect difficult terms
+* Provide meaning after each section
+* Example:
+  “Jurisdiction: the official power to make legal decisions.”
+
+### **4.5 Multi-Language Support**
+
+Output should be available in:
+**English, Hindi, Marathi, Gujarati, Tamil, Telugu, Kannada, Malayalam, Bengali, Punjabi, Odia, Urdu.**
+
+### **4.6 Download Output**
+
+Download simplified content as:
+
+* **PDF**
+* **JPEG (image)**
+* Automatically add header:
+  “Simplified version – powered by AI (not a legal replacement).”
+
+### **4.7 History (Optional)**
+
+* User can view previously simplified documents
+* Store for 7 days on cloud
+
+### **4.8 Safety / Compliance**
+
+* Do not store sensitive documents permanently
+* Auto-delete after 7 days
+* Encrypted upload and processing
+* Disclaimer: “This tool only simplifies language, not legally verified.”
+
+---
+
+## **5. Functional Requirements**
+
+### **FR1: Sign Up / Login**
+
+* Email & password
+* Google login optional
+
+### **FR2: Upload Document**
+
+* UI: drag & drop
+* Show accepted formats
+* Validate size & type
+
+### **FR3: OCR Processing**
+
+* Detect language automatically
+* Extract text line-by-line
+* Maintain formatting order
+
+### **FR4: Text Simplification**
+
+* Pass extracted text to AI model
+* Generate simplified version
+* Provide difficult term explanations
+* Avoid removal of any content
+
+### **FR5: Language Selection**
+
+* Dropdown of 12 languages
+* Output regenerated in chosen language
+
+### **FR6: Output Viewer**
+
+* Two sections:
+
+  * Original text
+  * Simplified text
+* Highlight difficult words
+
+### **FR7: Export**
+
+* PDF export with logo, date, watermark
+* JPEG export for single-page format
+
+### **FR8: Data Protection**
+
+* Auto-delete files after 7 days
+* Temporary storage bucket
+
+---
+
+## **6. Non-Functional Requirements**
+
+### **NFR1: Performance**
+
+* OCR processing < 10 seconds
+* Simplification < 5 seconds
+
+### **NFR2: Compatibility**
+
+* Works on all browsers
+* Mobile responsive
+
+### **NFR3: Security**
+
+* HTTPS
+* Encrypted uploads
+* No sharing without user permission
+
+### **NFR4: Reliability**
+
+* Must handle corrupted images gracefully
+* Error message if OCR fails
+
+---
+
+## **7. Tech Stack (Recommended for Replit)**
+
+### **Frontend**
+
+* React (Replit supports React template)
+* Tailwind CSS
+* File uploader (react-dropzone)
+
+### **Backend**
+
+* Python (FastAPI) OR Node.js (Express)
+* OCR: **Tesseract.js** or **Google Vision API**
+* AI Text Simplification: OpenAI / Gemini API
+
+### **Database**
+
+* Supabase / Firebase (optional for user history)
+
+### **Storage**
+
+* Replit DB or Supabase Storage
+* Client-side temporary hold
+
+### **PDF/JPEG Export**
+
+* html-to-image
+* jsPDF
+
+---
+
+## **8. User Flow**
+
+1. User opens website
+2. Selects upload type (photo/PDF)
+3. Uploads document
+4. Chooses language
+5. Clicks “Simplify Document”
+6. OCR extracts → AI rewrites → glossary generated
+7. User sees the simplified version
+8. User downloads output as PDF/JPEG
+9. Document auto-deletes after 7 days
+
+---
+
+## **9. UI/UX Requirements**
+
+### **Upload Page**
+
+* Big drop zone
+* “Supported formats: JPG, PNG, PDF”
+* Language selector
+
+### **Result Page**
+
+* Split screen (Original | Simplified)
+* Glossary section
+* Download buttons
+* Loading animation
+
+### **Theme**
+
+* Clean
+* Government-friendly trust feel
+* Light colors (blue/white/grey)
+
+---
+
+## **10. Risks & Considerations**
+
+| Risk                  | Impact            | Mitigation                                   |
+| --------------------- | ----------------- | -------------------------------------------- |
+| Poor OCR quality      | Wrong text        | Use Google Vision for accuracy               |
+| AI hallucination      | Wrong meaning     | Force AI: “Do not add or remove information” |
+| Privacy concerns      | User distrust     | Auto-delete + encrypted processing           |
+| Multi-language errors | Wrong translation | Use tested translation models                |
+
+---
+
+## **11. Success Metrics**
+
+* OCR accuracy ≥ 90%
+* Simplification satisfaction (user rating) ≥ 4/5
+* Document processing time ≤ 15 seconds
+* 100+ users in first month
