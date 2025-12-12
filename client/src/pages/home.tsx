@@ -15,10 +15,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden w-full">
       <Header />
       
-      <main>
+      <main className="w-full overflow-x-hidden">
         <HeroSection onUploadClick={handleUploadClick} />
         <DemoSection />
         <FeaturesSection />

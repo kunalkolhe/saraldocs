@@ -404,7 +404,7 @@ export default function SimplifyPage() {
 
   if (result) {
     return (
-      <div className="min-h-screen bg-background" ref={resultRef}>
+      <div className="min-h-screen bg-background overflow-x-hidden w-full" ref={resultRef}>
         <Header />
         <ResultsView
           result={result}
@@ -425,11 +425,11 @@ export default function SimplifyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden w-full">
       <Header />
       
-      <main className="py-10">
-        <div className="mx-auto max-w-3xl px-6">
+      <main className="py-6 sm:py-10 overflow-x-hidden">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div className="mb-6">
             <Button
               variant="ghost"
