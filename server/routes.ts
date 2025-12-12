@@ -41,73 +41,88 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   
-  app.post("/api/simplify", upload.single("file"), async (req, res) => {
+  app.post("/api/simplify", async (req, res) => {
     try {
-      const file = req.file;
-      const language = req.body.language || "en";
+      const { imageBase64, language = "en", fileName = "document" } = req.body;
 
-      if (!file) {
+      if (!imageBase64) {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
+      // Extract base64 data (remove data URL prefix if present)
+      const base64Data = imageBase64.replace(/^data:[^;]+;base64,/, "");
+      const buffer = Buffer.from(base64Data, "base64");
+      
+      // Determine file type from the data URL or filename
+      const mimeMatch = imageBase64.match(/^data:([^;]+);base64,/);
+      const mimeType = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+      
+      // Save to temporary file
+      const ext = mimeType.includes("pdf") ? ".pdf" : 
+                  mimeType.includes("png") ? ".png" : ".jpg";
+      const tempFilePath = path.join(uploadDir, `${Date.now()}-${Math.random().toString(36).substring(7)}${ext}`);
+      fs.writeFileSync(tempFilePath, buffer);
+
       let extractedText = "";
 
-      if (isImageFile(file.originalname)) {
-        extractedText = await extractTextFromImage(file.path, language);
-      } else if (isPDFFile(file.originalname)) {
-        extractedText = await extractTextFromPDF(file.path, language);
-      } else {
-        fs.unlinkSync(file.path);
-        return res.status(400).json({ message: "Unsupported file type" });
-      }
-
-      if (!extractedText || extractedText.trim().length < 10) {
-        fs.unlinkSync(file.path);
-        return res.status(400).json({ 
-          message: "Could not extract text from the document. Please ensure the image is clear and contains readable text." 
-        });
-      }
-
-      const simplificationResult = await simplifyDocument(extractedText, language);
-
-      fs.unlinkSync(file.path);
-
-      const response: SimplifyResponse = {
-        originalText: extractedText,
-        simplifiedText: simplificationResult.simplifiedText || "Unable to simplify the document.",
-        glossary: Array.isArray(simplificationResult.glossary) ? simplificationResult.glossary : [],
-        targetLanguage: language,
-      };
-
-      const validated = simplifyResponseSchema.safeParse(response);
-      if (!validated.success) {
-        console.error("Response validation failed:", validated.error);
-        return res.status(500).json({ 
-          message: "Failed to generate valid simplified document" 
-        });
-      }
-
       try {
-        await storage.saveDocument({
-          originalText: validated.data.originalText,
-          simplifiedText: validated.data.simplifiedText,
-          targetLanguage: validated.data.targetLanguage,
-          glossary: validated.data.glossary,
-          fileName: file.originalname,
-          expiresAt: null,
-        });
-      } catch (saveError) {
-        console.error("Failed to save document to history:", saveError);
-      }
+        if (isImageFile(fileName) || mimeType.startsWith("image/")) {
+          extractedText = await extractTextFromImage(tempFilePath, language);
+        } else if (isPDFFile(fileName) || mimeType.includes("pdf")) {
+          extractedText = await extractTextFromPDF(tempFilePath, language);
+        } else {
+          fs.unlinkSync(tempFilePath);
+          return res.status(400).json({ message: "Unsupported file type" });
+        }
 
-      res.json(validated.data);
+        if (!extractedText || extractedText.trim().length < 10) {
+          fs.unlinkSync(tempFilePath);
+          return res.status(400).json({ 
+            message: "Could not extract text from the document. Please ensure the image is clear and contains readable text." 
+          });
+        }
+
+        const simplificationResult = await simplifyDocument(extractedText, language);
+
+        fs.unlinkSync(tempFilePath);
+
+        const response: SimplifyResponse = {
+          originalText: extractedText,
+          simplifiedText: simplificationResult.simplifiedText || "Unable to simplify the document.",
+          glossary: Array.isArray(simplificationResult.glossary) ? simplificationResult.glossary : [],
+          targetLanguage: language,
+        };
+
+        const validated = simplifyResponseSchema.safeParse(response);
+        if (!validated.success) {
+          console.error("Response validation failed:", validated.error);
+          return res.status(500).json({ 
+            message: "Failed to generate valid simplified document" 
+          });
+        }
+
+        try {
+          await storage.saveDocument({
+            originalText: validated.data.originalText,
+            simplifiedText: validated.data.simplifiedText,
+            targetLanguage: validated.data.targetLanguage,
+            glossary: validated.data.glossary,
+            fileName: fileName,
+            expiresAt: null,
+          });
+        } catch (saveError) {
+          console.error("Failed to save document to history:", saveError);
+        }
+
+        res.json(validated.data);
+      } catch (innerError) {
+        if (fs.existsSync(tempFilePath)) {
+          fs.unlinkSync(tempFilePath);
+        }
+        throw innerError;
+      }
     } catch (error) {
       console.error("Simplify error:", error);
-      
-      if (req.file && fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
-      
       res.status(500).json({ 
         message: error instanceof Error ? error.message : "Failed to process document" 
       });
