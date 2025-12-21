@@ -176,28 +176,31 @@ WHAT NOT TO DO:
 ✗ DO NOT omit the subject/title from the output
 ✗ DO NOT leave out any reference documents or prior circulars mentioned
 
+PARAGRAPH STRUCTURE - PRESERVE "AS IS" FORMAT:
+**MOST IMPORTANT**: Keep the SAME PARAGRAPH STRUCTURE as the original document. 
+- If the original has 5 paragraphs, your simplified version MUST have 5 paragraphs
+- Keep paragraphs in the SAME ORDER
+- EACH paragraph in the original should be simplified to ONE corresponding paragraph (with same meaning, simpler language)
+- Do NOT merge or split paragraphs
+- Keep the paragraph breaks exactly as they appear in the original
+- Preserve the flow and sequence of the document
+
 FORMAT:
-[SUBJECT LINE - Include the exact subject from the document]
+[Paragraph 1 - Simplified]: Keep exact same content as original paragraph 1, but write in simple, easy words
+[Paragraph 2 - Simplified]: Keep exact same content as original paragraph 2, but write in simple, easy words
+[Paragraph 3 - Simplified]: Keep exact same content as original paragraph 3, but write in simple, easy words
+... and so on for ALL paragraphs
 
-[Document Details]
-Include the department name, office address, date, and any other administrative details - explain what each means in simple words.
+PARAGRAPH SIMPLIFICATION RULES:
+- Each original paragraph → becomes one simplified paragraph (same order, same number)
+- Simplify the language but KEEP ALL DETAILS from that paragraph
+- NO REMOVING information from any paragraph
+- NO MERGING paragraphs together
+- NO SPLITTING paragraphs
+- NO CHANGING paragraph order
+- Keep the exact same structure, just make words simpler
 
-[Previous References]
-List all the previous circulars, orders, or decisions mentioned - explain why each one is important and what it said in simple language.
-
-[Main Explanation]
-[Paragraph 1: What is this about?]
-Explain what this is about in very simple words with full context. Make it easy to understand. Include why this matters. INCLUDE the subject and all main topics.
-
-[Paragraph 2, 3, 4...: Each important idea and section]
-For EACH main idea, section, rule, requirement from the document:
-- What is it? (explain simply, keep all details)
-- Why does it matter? (context and importance)
-- How does it work? (step by step)
-- What should people do? (practical guidance)
-- Include ALL specific references, numbers, and requirements - nothing removed
-
-ABSOLUTELY CRITICAL: Every line from the original MUST appear (in simplified language) in the output. If the original mentions something, you MUST include it in the simplified version.
+ABSOLUTELY CRITICAL: Every line from the original MUST appear (in simplified language) in the output. Keep the EXACT SAME paragraph structure. If the original has paragraphs, your output MUST preserve those paragraph breaks.
 
 LANGUAGE RULES:
 - Use VERY SIMPLE words - words a child can understand
